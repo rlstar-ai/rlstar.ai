@@ -12,7 +12,7 @@ on:
     paths:
       - "algorithms/**/*.md"
       - "build.py"
-      - "rl-star.html"
+      - "index.html"
 
 jobs:
   # ── Job 1: validate & build (runs on every PR and push to main) ──────────
