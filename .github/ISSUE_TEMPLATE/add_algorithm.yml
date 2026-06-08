@@ -1,0 +1,76 @@
+name: "Add Algorithm"
+description: "Propose a new LLM-RL algorithm to be added to RL-Star"
+title: "Add: <AlgorithmName>"
+labels: ["add-algorithm"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Short name (displayed on globe)
+      description: "≤ 12 characters, e.g. GRPO, DAPO, SimPO"
+    validations:
+      required: true
+
+  - type: input
+    id: full
+    attributes:
+      label: Full paper title
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - foundation
+        - reasoning
+        - report
+        - agentic
+        - alignment
+    validations:
+      required: true
+
+  - type: input
+    id: year
+    attributes:
+      label: Publication year
+      placeholder: "2024"
+    validations:
+      required: true
+
+  - type: input
+    id: paper
+    attributes:
+      label: Paper URL
+      description: "Prefer arxiv.org/abs/XXXX format"
+    validations:
+      required: true
+
+  - type: textarea
+    id: desc
+    attributes:
+      label: One-line description
+      description: "Plain English, ≤ 180 characters. What makes this algorithm distinct?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: connects
+    attributes:
+      label: Related algorithm ids
+      description: "Comma-separated ids from algorithms.js, e.g. grpo, ppo, dapo"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: The paper is publicly available
+          required: true
+        - label: The algorithm is directly related to LLM training via RL
+          required: true
+        - label: I checked that this algorithm is not already in algorithms.js
+          required: true

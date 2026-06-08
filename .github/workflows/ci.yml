@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  pull_request:
+    paths:
+      - "algorithms/**/*.md"
+      - "build.py"
+  push:
+    branches:
+      - main
+    paths:
+      - "algorithms/**/*.md"
+      - "build.py"
+      - "rl-star.html"
+
+jobs:
+  # ── Job 1: validate & build (runs on every PR and push to main) ──────────
+  build:
+    name: Validate & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run build.py
+        run: python build.py
+
+      - name: Upload algorithms.js artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: algorithms-js
+          path: algorithms.js
+
+  # ── Job 2: deploy to GitHub Pages (only on push to main) ─────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to push to gh-pages branch
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Rebuild algorithms.js (fresh checkout)
+        run: python build.py
+
+      - name: Deploy to gh-pages branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .
+          publish_branch: gh-pages
+          # Only publish the files the site actually needs
+          exclude_assets: ".github,algorithms,build.py,__pycache__,*.md"
