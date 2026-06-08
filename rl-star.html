@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RL-Star: Modern LLM Reinforcement Learning Algorithms</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #0a0a1a;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      color: #e0e0ff;
+    }
+
+    #canvas-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    #three-canvas {
+      display: block;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: absolute;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+    }
+
+    #header p {
+      font-size: 0.78rem;
+      color: rgba(160, 160, 255, 0.55);
+      margin-top: 4px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── Category nav bar ── */
+    #cat-nav {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 0 16px 18px;
+      /* fade edges */
+      -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+      mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    }
+
+    #cat-nav-inner {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 12px 20px;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      background: rgba(8, 8, 22, 0.72);
+      border: 1px solid rgba(80, 70, 160, 0.3);
+      border-radius: 50px;
+      backdrop-filter: blur(12px);
+    }
+
+    #cat-nav-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .cat-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 16px;
+      border-radius: 50px;
+      border: 1px solid transparent;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      cursor: pointer;
+      scroll-snap-align: center;
+      transition: background 0.25s, border-color 0.25s, color 0.25s, transform 0.15s;
+      color: rgba(180, 180, 220, 0.6);
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .cat-tab:hover {
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .cat-tab.active {
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .cat-tab-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      transition: box-shadow 0.25s;
+    }
+
+    /* ── Node tooltip ── */
+    #tooltip {
+      position: absolute;
+      background: rgba(10, 10, 30, 0.92);
+      border: 1px solid rgba(120, 100, 255, 0.4);
+      border-radius: 10px;
+      padding: 12px 16px;
+      max-width: 260px;
+      pointer-events: none;
+      z-index: 20;
+      display: none;
+      backdrop-filter: blur(8px);
+    }
+
+    #tooltip h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    #tooltip .category-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-bottom: 6px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    #tooltip p {
+      font-size: 0.75rem;
+      color: rgba(180, 180, 220, 0.85);
+      line-height: 1.5;
+    }
+
+    #tooltip a {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 0.7rem;
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    #tooltip a:hover {
+      text-decoration: underline;
+    }
+
+    /* ── Edge side panel ── */
+    #edge-tooltip {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 100vh;
+      background: rgba(8, 8, 24, 0.96);
+      border-left: 1px solid rgba(100, 180, 255, 0.25);
+      padding: 28px 22px;
+      z-index: 30;
+      backdrop-filter: blur(16px);
+      pointer-events: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    #edge-tooltip.visible {
+      transform: translateX(0);
+    }
+
+    #edge-tooltip .et-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 26px;
+      height: 26px;
+      cursor: pointer;
+      color: rgba(160, 160, 220, 0.5);
+      font-size: 1.1rem;
+      line-height: 26px;
+      text-align: center;
+      border-radius: 50%;
+      transition: color 0.2s, background 0.2s;
+    }
+
+    #edge-tooltip .et-close:hover {
+      color: #fff;
+      background: rgba(255,255,255,0.08);
+    }
+
+    #edge-tooltip .et-header {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-right: 24px;
+    }
+
+    #edge-tooltip .et-nodes {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    #edge-tooltip .et-arrow {
+      font-size: 0.75rem;
+      color: rgba(140, 180, 255, 0.55);
+      font-weight: 600;
+    }
+
+    #edge-tooltip .et-names {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #e0e8ff;
+    }
+
+    #edge-tooltip .et-label {
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      color: rgba(120, 140, 200, 0.5);
+      text-transform: uppercase;
+    }
+
+    #edge-tooltip .et-divider {
+      height: 1px;
+      background: rgba(100, 120, 200, 0.18);
+    }
+
+    #edge-tooltip .et-desc {
+      font-size: 0.78rem;
+      color: rgba(190, 210, 245, 0.88);
+      line-height: 1.7;
+    }
+
+    /* ── Controls hint ── */
+    #controls-hint {
+      position: absolute;
+      bottom: 88px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.62rem;
+      color: rgba(100, 100, 160, 0.38);
+      letter-spacing: 0.05em;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* ── View toggle ── */
+    #view-toggle {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      z-index: 10;
+      display: flex;
+      background: rgba(14, 14, 36, 0.78);
+      border: 1px solid rgba(100, 80, 200, 0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .view-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: rgba(160, 160, 220, 0.55);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .view-btn svg {
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      flex-shrink: 0;
+    }
+
+    .view-btn:hover {
+      color: #fff;
+    }
+
+    .view-btn:hover svg {
+      opacity: 1;
+    }
+
+    .view-btn.active {
+      background: rgba(100, 80, 200, 0.28);
+      color: #fff;
+    }
+
+    .view-btn.active svg {
+      opacity: 1;
+    }
+
+    .view-btn+.view-btn {
+      border-left: 1px solid rgba(100, 80, 200, 0.25);
+    }
+
+    /* ── Search ── */
+    #search-box {
+      position: absolute;
+      top: 24px;
+      left: 28px;
+      z-index: 10;
+    }
+
+    #search-box input {
+      background: rgba(20, 20, 50, 0.75);
+      border: 1px solid rgba(100, 80, 200, 0.4);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: #d0d0ff;
+      font-size: 0.75rem;
+      width: 180px;
+      outline: none;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s;
+    }
+
+    #search-box input:focus {
+      border-color: rgba(140, 100, 255, 0.8);
+    }
+
+    #search-box input::placeholder {
+      color: rgba(140, 140, 200, 0.45);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="canvas-container">
+    <canvas id="three-canvas"></canvas>
+
+    <div id="header">
+      <h1>✦ RL-STAR</h1>
+      <p>Modern LLM Reinforcement Learning Algorithms · Interactive 3D Globe</p>
+    </div>
+
+    <div id="search-box">
+      <input type="text" id="search-input" placeholder="Search algorithm…" autocomplete="off" />
+    </div>
+
+    <div id="view-toggle">
+      <div class="view-btn active" id="btn-globe">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <path
+            d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+        Globe
+      </div>
+      <div class="view-btn" id="btn-map">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+          <line x1="8" y1="2" x2="8" y2="18" />
+          <line x1="16" y1="6" x2="16" y2="22" />
+        </svg>
+        Map
+      </div>
+    </div>
+
+    <div id="tooltip">
+      <h3 id="tt-name"></h3>
+      <div id="tt-badge" class="category-badge"></div>
+      <p id="tt-desc"></p>
+      <a id="tt-link" href="#" target="_blank" rel="noopener">→ Paper</a>
+    </div>
+
+    <div id="edge-tooltip">
+      <div class="et-close" id="et-close">✕</div>
+      <div class="et-header">
+        <div class="et-label">Connection</div>
+        <div class="et-nodes">
+          <span class="et-names" id="et-src"></span>
+          <span class="et-arrow">→</span>
+          <span class="et-names" id="et-dst"></span>
+        </div>
+      </div>
+      <div class="et-divider"></div>
+      <p class="et-desc" id="et-desc"></p>
+    </div>
+
+    <div id="controls-hint">Drag to rotate · Scroll to zoom · Tap nodes for details</div>
+
+    <div id="cat-nav">
+      <div id="cat-nav-inner">
+        <!-- tabs injected by JS from CAT config -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Algorithm data — edit algorithms.js to add new entries -->
+  <script src="algorithms.js"></script>
+  <!-- Three.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    // ════════════════════════════════════════════════
+    //  DATA — Algorithm nodes
+    // ════════════════════════════════════════════════
+    // ALGORITHMS is loaded from algorithms.js (see <script> tag above)
+
+    // ════════════════════════════════════════════════
+    //  CATEGORY CONFIG
+    // ════════════════════════════════════════════════
+    // ── Category config — the ONLY place to add/remove categories ──
+    // To add a new category: append one line here, then add .md files with that category id.
+    // Everything else (tabs, sectors, colors) is derived automatically.
+    const CAT = {
+      foundation: { color: 0xf59e0b, hex: "#f59e0b", label: "Foundation" },
+      reasoning: { color: 0xa78bfa, hex: "#a78bfa", label: "Reasoning-RL" },
+      agentic: { color: 0x34d399, hex: "#34d399", label: "Agentic-RL" },
+      report: { color: 0x60a5fa, hex: "#60a5fa", label: "Tech Report" },
+      alignment: { color: 0xf472b6, hex: "#f472b6", label: "Alignment" },
+      OPD: { color: 0xf87171, hex: "#f87171", label: "On-Policy Distillation" }
+    };
+
+    // ── Auto-generate bottom nav tabs from CAT ──
+    (function () {
+      const inner = document.getElementById("cat-nav-inner");
+      Object.entries(CAT).forEach(([id, cfg]) => {
+        const div = document.createElement("div");
+        div.className = "cat-tab";
+        div.dataset.cat = id;
+        div.innerHTML =
+          `<div class="cat-tab-dot" style="background:${cfg.hex};box-shadow:0 0 6px ${cfg.hex}88"></div>${cfg.label}`;
+        inner.appendChild(div);
+      });
+    })();
+
+    // ════════════════════════════════════════════════
+    //  THREE.JS SCENE
+    // ════════════════════════════════════════════════
+    const canvas = document.getElementById("three-canvas");
+    const tooltip = document.getElementById("tooltip");
+
+    const W = () => window.innerWidth;
+    const H = () => window.innerHeight;
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(W(), H());
+    renderer.setClearColor(0x000000, 0);
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, W() / H(), 0.1, 1000);
+    camera.position.set(0, 0, 5.5);
+
+    // ── Ambient + point light ──
+    const ambient = new THREE.AmbientLight(0x8888ff, 0.4);
+    scene.add(ambient);
+    const ptLight = new THREE.PointLight(0xa78bfa, 1.2, 30);
+    ptLight.position.set(3, 3, 3);
+    scene.add(ptLight);
+    const ptLight2 = new THREE.PointLight(0x60a5fa, 0.8, 30);
+    ptLight2.position.set(-3, -2, -3);
+    scene.add(ptLight2);
+
+    // ── Globe (transparent sphere) ──
+    const globeGeo = new THREE.SphereGeometry(2.2, 64, 64);
+    const globeMat = new THREE.MeshPhongMaterial({
+      color: 0x3344aa,
+      transparent: true,
+      opacity: 0.07,
+      side: THREE.DoubleSide,
+      depthWrite: false,
+    });
+    const globe = new THREE.Mesh(globeGeo, globeMat);
+    scene.add(globe);
+
+    // Grid lines — meridians + parallels only, no diagonals
+    const wireMat = new THREE.LineBasicMaterial({
+      color: 0x5566cc, transparent: true, opacity: 0.13,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+    });
+    // Keep a dummy object so wireMesh.visible still works in morph code
+    const wireMesh = new THREE.Group();
+    scene.add(wireMesh);
+
+    (function buildGrid() {
+      const R = 2.2, SEG = 64;
+      // 8 meridians (longitude lines)
+      for (let i = 0; i < 8; i++) {
+        const lon = (i / 8) * Math.PI * 2;
+        const pts = [];
+        for (let j = 0; j <= SEG; j++) {
+          const lat = -Math.PI / 2 + Math.PI * j / SEG;
+          pts.push(new THREE.Vector3(
+            R * Math.cos(lat) * Math.cos(lon),
+            R * Math.sin(lat),
+            R * Math.cos(lat) * Math.sin(lon)
+          ));
+        }
+        wireMesh.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+      }
+      // 5 parallels (latitude lines): -60, -30, 0, 30, 60
+      [-60, -30, 0, 30, 60].forEach(deg => {
+        const lat = deg * Math.PI / 180;
+        const r = R * Math.cos(lat);
+        const y = R * Math.sin(lat);
+        const pts = [];
+        for (let j = 0; j <= SEG; j++) {
+          const lon = (j / SEG) * Math.PI * 2;
+          pts.push(new THREE.Vector3(r * Math.cos(lon), y, r * Math.sin(lon)));
+        }
+        wireMesh.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), wireMat));
+      });
+    })();
+
+    const RADIUS = 2.2;
+
+    // ── Sector config: one longitude band per category, order follows CAT ──
+    const SECTOR_ORDER = Object.keys(CAT);
+    const SECTOR_WIDTH = (2 * Math.PI) / SECTOR_ORDER.length;
+    const SECTOR_CENTER = {};
+    SECTOR_ORDER.forEach((cat, i) => {
+      SECTOR_CENTER[cat] = i * SECTOR_WIDTH + SECTOR_WIDTH * 0.5;
+    });
+
+    // ── Year-spiral layout: category clustering + temporal spiral ──
+    // Each category owns a longitude sector (72°).
+    // Within a sector, rank by year → both latitude AND longitude advance
+    // together, tracing a diagonal spiral upward through the sector.
+    // Same-year nodes within a sector get a tiny perpendicular offset.
+    //
+    // Tuning knobs:
+    //   SPIRAL_TURNS  – how many full left-right oscillations per category
+    //   SPREAD_HALF   – half-width of usable longitude inside the sector
+    function yearSpiralPositions(algos, radius) {
+      // Keep nodes in the visible mid-latitude band, away from poles
+      const LAT_MIN = -Math.PI / 2 + 0.88;   // ≈ -39°
+      const LAT_MAX = Math.PI / 2 - 0.88;   // ≈ +39°
+
+      // Spiral longitude amplitude: small enough that all nodes clearly belong
+      // to their sector, large enough to show the spiral.
+      // SECTOR_WIDTH ≈ 72°; amplitude of ±14° keeps nodes well inside the sector.
+      const SPIRAL_AMP = SECTOR_WIDTH * 0.20;
+
+      // How many left↔right oscillations across the full rank range.
+      const SPIRAL_TURNS = 0.65;
+
+      // Group & sort each category by year then id
+      const catGroups = {};
+      SECTOR_ORDER.forEach(c => { catGroups[c] = []; });
+      algos.forEach(a => catGroups[a.category].push(a));
+      SECTOR_ORDER.forEach(c => {
+        catGroups[c].sort((a, b) => a.year !== b.year ? a.year - b.year : a.id.localeCompare(b.id));
+        catGroups[c].forEach((a, i) => {
+          a._catRank = i;
+          a._catTotal = catGroups[c].length;
+        });
+      });
+
+      // Track same-(category,year) bucket for stacking offset
+      const bucketCount = {}, bucketIdx = {};
+      algos.forEach(a => {
+        const key = `${a.category}:${a.year}`;
+        bucketCount[key] = (bucketCount[key] || 0) + 1;
+      });
+      algos.forEach(a => {
+        const key = `${a.category}:${a.year}`;
+        bucketIdx[key] = (bucketIdx[key] || 0);
+        a._bucketIdx = bucketIdx[key]++;
+        a._bucketSize = bucketCount[key];
+      });
+
+      return algos.map(algo => {
+        const n = algo._catTotal;
+        const t = n === 1 ? 0.5 : algo._catRank / (n - 1);  // 0 (oldest) → 1 (newest)
+
+        // Latitude rises with rank
+        const lat = LAT_MIN + t * (LAT_MAX - LAT_MIN);
+
+        // Longitude: sinusoidal spiral within the sector
+        const spiralOffset = SPIRAL_AMP * Math.sin(t * Math.PI * 2 * SPIRAL_TURNS);
+
+        // Small nudge for same-(category,year) stacking
+        const bn = algo._bucketSize;
+        const bi = algo._bucketIdx;
+        const stackOffset = bn === 1 ? 0
+          : SPIRAL_AMP * 0.35 * (bi - (bn - 1) / 2);
+
+        const lon = SECTOR_CENTER[algo.category] + spiralOffset + stackOffset;
+
+        const cosLat = Math.cos(lat);
+        return new THREE.Vector3(
+          radius * cosLat * Math.cos(lon),
+          radius * Math.sin(lat),
+          radius * cosLat * Math.sin(lon)
+        );
+      });
+    }
+
+    const positions = yearSpiralPositions(ALGORITHMS, RADIUS);
+    const nodeMap = {};   // id → { mesh, data, pos }
+    const nodeMeshes = [];
+
+    // Compute the circular mean phi of each category's nodes after drift,
+    // then derive the pivot.rotation.y needed to face that cluster toward the camera.
+    // Circular mean avoids the ±π wraparound bug of arithmetic mean:
+    //   avgPhi = atan2(mean(sin(phi)), mean(cos(phi)))
+    const catSinSum = {}, catCosSum = {}, catPhiCount = {};
+    SECTOR_ORDER.forEach(c => { catSinSum[c] = 0; catCosSum[c] = 0; catPhiCount[c] = 0; });
+    ALGORITHMS.forEach((algo, i) => {
+      const p = positions[i];
+      const phi = Math.atan2(p.z, p.x);
+      catSinSum[algo.category] += Math.sin(phi);
+      catCosSum[algo.category] += Math.cos(phi);
+      catPhiCount[algo.category] += 1;
+    });
+    const CAT_TARGET_ROTY = {};
+    SECTOR_ORDER.forEach(cat => {
+      const n = catPhiCount[cat] || 1;
+      const avgPhi = Math.atan2(catSinSum[cat] / n, catCosSum[cat] / n);
+      // pivot.rotation.y rotates the whole scene around Y.
+      // A node at longitude φ reaches +Z (faces camera) when pivot rotates by (φ - π/2):
+      //   world_z = sin(φ + rotY) = 1  →  φ + rotY = π/2  →  rotY = π/2 - φ
+      // But pivot rotation moves nodes in the opposite direction to the camera,
+      // so the effective sign is flipped: rotY = φ - π/2
+      CAT_TARGET_ROTY[cat] = avgPhi - Math.PI / 2;
+    });
+
+
+
+    // ── Node sprites (4-point star with glow) ──
+    function makeNodeSprite(color) {
+      const size = 128;
+      const cnv = document.createElement("canvas");
+      cnv.width = cnv.height = size;
+      const ctx = cnv.getContext("2d");
+      const cx = size / 2;
+
+      // Soft glow halo underneath the star
+      const grad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx * 0.9);
+      grad.addColorStop(0, color + "88");
+      grad.addColorStop(0.5, color + "33");
+      grad.addColorStop(1, color + "00");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, size, size);
+
+      // 4-point star path (classic ★ with 4 spikes)
+      function starPath(cx, cy, outerR, innerR, points) {
+        ctx.beginPath();
+        for (let i = 0; i < points * 2; i++) {
+          const angle = (i * Math.PI) / points - Math.PI / 2;
+          const r = i % 2 === 0 ? outerR : innerR;
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      }
+
+      // Outer glow ring (blurred star silhouette)
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 18;
+      starPath(cx, cx, cx * 0.52, cx * 0.18, 4);
+      ctx.fillStyle = color + "66";
+      ctx.fill();
+      ctx.restore();
+
+      // Core star — bright fill
+      ctx.save();
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 10;
+      starPath(cx, cx, cx * 0.42, cx * 0.13, 4);
+      const starGrad = ctx.createRadialGradient(cx, cx, 0, cx, cx, cx * 0.42);
+      starGrad.addColorStop(0, "#ffffff");
+      starGrad.addColorStop(0.35, color + "ff");
+      starGrad.addColorStop(1, color + "bb");
+      ctx.fillStyle = starGrad;
+      ctx.fill();
+      ctx.restore();
+
+      return new THREE.CanvasTexture(cnv);
+    }
+
+    const spriteCache = {};
+    ALGORITHMS.forEach((algo, i) => {
+      const cat = CAT[algo.category];
+      if (!spriteCache[algo.category]) {
+        spriteCache[algo.category] = makeNodeSprite(cat.hex);
+      }
+      const mat = new THREE.SpriteMaterial({
+        map: spriteCache[algo.category],
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+      const sprite = new THREE.Sprite(mat);
+      sprite.scale.set(0.55, 0.55, 1);
+      sprite.position.copy(positions[i]);
+      sprite.userData = { algo, index: i, baseScale: 0.55 };
+      scene.add(sprite);
+      nodeMeshes.push(sprite);
+      nodeMap[algo.id] = { mesh: sprite, data: algo, pos: positions[i].clone() };
+    });
+
+    // ── Labels ──
+    function makeLabel(text, color) {
+      const cnv = document.createElement("canvas");
+      cnv.width = 256; cnv.height = 64;
+      const ctx = cnv.getContext("2d");
+      ctx.clearRect(0, 0, 256, 64);
+      ctx.font = "bold 28px 'Segoe UI', sans-serif";
+      ctx.fillStyle = color;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, 128, 32);
+      return new THREE.CanvasTexture(cnv);
+    }
+
+    const labelSprites = [];
+    ALGORITHMS.forEach((algo, i) => {
+      const cat = CAT[algo.category];
+      const tex = makeLabel(algo.name, cat.hex);
+      const mat = new THREE.SpriteMaterial({
+        map: tex, transparent: true, depthWrite: false,
+      });
+      const lbl = new THREE.Sprite(mat);
+      lbl.scale.set(1.1, 0.28, 1);
+      const offset = positions[i].clone().normalize().multiplyScalar(0.38);
+      lbl.position.copy(positions[i]).add(offset);
+      lbl.userData = { isLabel: true };
+      scene.add(lbl);
+      labelSprites.push(lbl);
+    });
+
+    // ── Tapered tube geometry (fat middle, pointed ends) ──
+    // Replaces TubeGeometry with a custom mesh whose radius follows sin(t*π),
+    // giving a spindle / lens shape that reads as a directed edge.
+    function taperedTubeGeometry(curve, tubularSegments, maxRadius, radialSegments) {
+      const positions = [];
+      const indices = [];
+      const N = tubularSegments;
+      const R = radialSegments;
+
+      for (let i = 0; i <= N; i++) {
+        const t = i / N;
+        const radius = maxRadius * Math.sin(t * Math.PI);   // 0 → max → 0
+        const pt = curve.getPoint(t);
+        // Build a local frame using the tangent
+        const tan = curve.getTangent(t).normalize();
+        // Choose a stable up vector; if tangent is nearly vertical, use X
+        const up = Math.abs(tan.y) < 0.99
+          ? new THREE.Vector3(0, 1, 0)
+          : new THREE.Vector3(1, 0, 0);
+        const binorm = new THREE.Vector3().crossVectors(tan, up).normalize();
+        const norm = new THREE.Vector3().crossVectors(binorm, tan).normalize();
+
+        for (let j = 0; j <= R; j++) {
+          const angle = (j / R) * Math.PI * 2;
+          const x = pt.x + radius * (Math.cos(angle) * norm.x + Math.sin(angle) * binorm.x);
+          const y = pt.y + radius * (Math.cos(angle) * norm.y + Math.sin(angle) * binorm.y);
+          const z = pt.z + radius * (Math.cos(angle) * norm.z + Math.sin(angle) * binorm.z);
+          positions.push(x, y, z);
+        }
+      }
+
+      for (let i = 0; i < N; i++) {
+        for (let j = 0; j < R; j++) {
+          const a = i * (R + 1) + j;
+          const b = a + 1;
+          const c = (i + 1) * (R + 1) + j;
+          const d = c + 1;
+          indices.push(a, c, b);
+          indices.push(b, c, d);
+        }
+      }
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geo.setIndex(indices);
+      return geo;
+    }
+
+    // ── Connections ──
+    const edgeSet = new Set();
+    const lineMeshes = [];
+    const tubeMeshes = [];
+
+    // Build symmetric adjacency
+    const neighbors = {};
+    ALGORITHMS.forEach(a => { neighbors[a.id] = new Set(); });
+    ALGORITHMS.forEach(a => {
+      (a.connects || []).forEach(b => {
+        if (neighbors[a.id]) neighbors[a.id].add(b);
+        if (neighbors[b]) neighbors[b].add(a.id);
+      });
+    });
+
+    // Build edge → improves lookup
+    const edgeImproves = {};
+    ALGORITHMS.forEach(algo => {
+      if (!algo.improves) return;
+      Object.entries(algo.improves).forEach(([targetId, desc]) => {
+        edgeImproves[edgeKey(algo.id, targetId)] = { srcId: algo.id, dstId: targetId, desc };
+      });
+    });
+
+    function edgeKey(a, b) { return [a, b].sort().join("--"); }
+
+    ALGORITHMS.forEach(algo => {
+      (algo.connects || []).forEach(targetId => {
+        const key = edgeKey(algo.id, targetId);
+        if (edgeSet.has(key)) return;
+        edgeSet.add(key);
+        const src = nodeMap[algo.id];
+        const dst = nodeMap[targetId];
+        if (!src || !dst) return;
+
+        const mid = new THREE.Vector3().addVectors(src.pos, dst.pos).multiplyScalar(0.5);
+        const pull = mid.length() < 0.1 ? 0 : 0.45;
+        mid.multiplyScalar(pull);
+
+        const curve = new THREE.QuadraticBezierCurve3(src.pos, mid, dst.pos);
+        const tubeGeo = taperedTubeGeometry(curve, 30, 0.018, 6);
+        const tubeMat = new THREE.MeshBasicMaterial({
+          color: 0x6655cc,
+          transparent: true,
+          opacity: 0,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending,
+        });
+        const tube = new THREE.Mesh(tubeGeo, tubeMat);
+        tube.userData = { srcId: algo.id, dstId: targetId, isEdge: true, curve };
+        scene.add(tube);
+        lineMeshes.push(tube);
+        tubeMeshes.push(tube);
+
+      });
+    });
+
+    // ── Background star sprites (4-point star shape via PointsMaterial texture) ──
+    (function () {
+      const sz = 64;
+      const cnv = document.createElement("canvas");
+      cnv.width = cnv.height = sz;
+      const ctx = cnv.getContext("2d");
+      const c = sz / 2;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const angle = (i * Math.PI) / 4 - Math.PI / 2;
+        const r = i % 2 === 0 ? c * 0.48 : c * 0.15;
+        const x = c + Math.cos(angle) * r;
+        const y = c + Math.sin(angle) * r;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      const g = ctx.createRadialGradient(c, c, 0, c, c, c * 0.48);
+      g.addColorStop(0, "#ffffff");
+      g.addColorStop(0.4, "#aabbff");
+      g.addColorStop(1, "rgba(68,85,204,0)");
+      ctx.fillStyle = g;
+      ctx.fill();
+      const tex = new THREE.CanvasTexture(cnv);
+
+      const verts = [];
+      for (let i = 0; i < 800; i++) {
+        verts.push(
+          (Math.random() - 0.5) * 60,
+          (Math.random() - 0.5) * 60,
+          (Math.random() - 0.5) * 60
+        );
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+      const mat = new THREE.PointsMaterial({
+        map: tex,
+        size: 0.22,
+        transparent: true,
+        opacity: 0.55,
+        alphaTest: 0.01,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true,
+      });
+      scene.add(new THREE.Points(geo, mat));
+    })();
+
+    // ════════════════════════════════════════════════
+    //  INTERACTION
+    // ════════════════════════════════════════════════
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+    let rotVel = { x: 0, y: 0 };      // angular velocity
+    const pivot = new THREE.Group();    // everything rotates inside pivot
+    // Move all scene children except camera/lights into pivot
+    scene.children.slice().forEach(obj => {
+      if (obj === ambient || obj === ptLight || obj === ptLight2) return;
+      scene.remove(obj);
+      pivot.add(obj);
+    });
+    // Tubes were never added to scene, add them directly to pivot now
+    scene.add(pivot);
+
+    let mouseDownPos = { x: 0, y: 0 };
+    let hasDragged = false;
+    let mapPanX = 0;      // current pan offset in world units (map mode)
+    let mapPanVelX = 0;      // inertia for map pan
+
+    canvas.addEventListener("mousedown", e => {
+      isDragging = true;
+      hasDragged = false;
+      mouseDownPos = { x: e.clientX, y: e.clientY };
+      prevMouse = { x: e.clientX, y: e.clientY };
+      rotVel = { x: 0, y: 0 };
+      mapPanVelX = 0;
+      mapPanTarget = null;   // manual drag cancels snap
+    });
+    window.addEventListener("mouseup", () => { isDragging = false; });
+    window.addEventListener("mousemove", e => {
+      if (isDragging) {
+        const dx = e.clientX - prevMouse.x;
+        const dy = e.clientY - prevMouse.y;
+        if (!hasDragged) {
+          const tdx = e.clientX - mouseDownPos.x;
+          const tdy = e.clientY - mouseDownPos.y;
+          if (Math.sqrt(tdx * tdx + tdy * tdy) > 5) hasDragged = true;
+        }
+        if (viewMode === "map" && morphT >= 1) {
+          // Pan horizontally in map mode
+          const worldPx = dx * (camera.position.z / H()) * 1.8;
+          mapPanX += worldPx;
+          mapPanVelX = worldPx;
+          pivot.position.x = mapPanX;
+        } else {
+          rotVel.y = dx * 0.005;
+          rotVel.x = dy * 0.005;
+          pivot.rotation.y += rotVel.y;
+          pivot.rotation.x += rotVel.x;
+        }
+        prevMouse = { x: e.clientX, y: e.clientY };
+      }
+      handleHover(e);
+    });
+
+    // Touch support
+    canvas.addEventListener("touchstart", e => {
+      isDragging = true;
+      hasDragged = false;
+      mouseDownPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      rotVel = { x: 0, y: 0 };
+      mapPanVelX = 0;
+    }, { passive: true });
+    window.addEventListener("touchend", () => { isDragging = false; });
+    window.addEventListener("touchmove", e => {
+      if (!isDragging) return;
+      const dx = e.touches[0].clientX - prevMouse.x;
+      const dy = e.touches[0].clientY - prevMouse.y;
+      if (!hasDragged) {
+        const tdx = e.touches[0].clientX - mouseDownPos.x;
+        const tdy = e.touches[0].clientY - mouseDownPos.y;
+        if (Math.sqrt(tdx * tdx + tdy * tdy) > 5) hasDragged = true;
+      }
+      if (viewMode === "map" && morphT >= 1) {
+        const worldPx = dx * (camera.position.z / H()) * 1.8;
+        mapPanX += worldPx;
+        mapPanVelX = worldPx;
+        pivot.position.x = mapPanX;
+      } else {
+        rotVel.y = dx * 0.005;
+        rotVel.x = dy * 0.005;
+        pivot.rotation.y += rotVel.y;
+        pivot.rotation.x += rotVel.x;
+      }
+      prevMouse = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }, { passive: true });
+
+    // Scroll to zoom (globe only)
+    canvas.addEventListener("wheel", e => {
+      if (viewMode !== "map") {
+        camera.position.z = Math.max(3, Math.min(10, camera.position.z + e.deltaY * 0.01));
+      }
+    });
+
+    // Raycaster for hover
+    const raycaster = new THREE.Raycaster();
+    const mouse2D = new THREE.Vector2();
+    let hoveredId = null;
+    let pinnedId = null;   // tooltip pinned by click
+
+    function handleHover(e) {
+      // While an edge is pinned, nothing changes
+      if (pinnedId !== null) {
+        canvas.style.cursor = "default";
+        return;
+      }
+      mouse2D.x = (e.clientX / W()) * 2 - 1;
+      mouse2D.y = -(e.clientY / H()) * 2 + 1;
+      raycaster.setFromCamera(mouse2D, camera);
+      const hits = raycaster.intersectObjects(nodeMeshes);
+      if (hits.length > 0) {
+        const hit = hits[0].object;
+        const algo = hit.userData.algo;
+        if (algo && algo.id !== hoveredId) {
+          hoveredId = algo.id;
+          showTooltip(e, algo);
+          highlightNode(algo.id);
+        }
+        canvas.style.cursor = "pointer";
+        return;
+      }
+
+      if (hoveredId !== null) {
+        hoveredId = null;
+        hideTooltip();
+        resetHighlight();
+      }
+      canvas.style.cursor = "grab";
+    }
+
+    let pinnedEdgeKey = null;   // currently pinned edge key
+
+    canvas.addEventListener("click", e => {
+      if (hasDragged) return;
+      mouse2D.x = (e.clientX / W()) * 2 - 1;
+      mouse2D.y = -(e.clientY / H()) * 2 + 1;
+      raycaster.setFromCamera(mouse2D, camera);
+
+      // 1. Try nodes
+      const nodeHits = raycaster.intersectObjects(nodeMeshes);
+      if (nodeHits.length > 0) {
+        const algo = nodeHits[0].object.userData.algo;
+        if (!algo) return;
+        if (pinnedId === algo.id) {
+          pinnedId = null;
+          hoveredId = null;
+          hideTooltip();
+          resetHighlight();
+          targetRotY = null;
+        } else {
+          pinnedId = algo.id;
+          hoveredId = algo.id;
+          targetRotY = pivot.rotation.y;
+          rotVel = { x: 0, y: 0 };
+          showTooltipPinned(algo);
+          highlightNode(algo.id);
+        }
+        return;
+      }
+
+      // 2. Click empty space → unpin everything
+      if (pinnedId !== null) {
+        pinnedId = null;
+        hoveredId = null;
+        hideTooltip();
+        hideEdgeTooltip();
+        resetHighlight();
+        targetRotY = null;
+      }
+    });
+
+    // ── Tooltip ──
+    function catColor(cat) { return CAT[cat]?.hex || "#aaa"; }
+    function catLabel(cat) { return CAT[cat]?.label || cat; }
+
+    function fillTooltip(algo) {
+      document.getElementById("tt-name").textContent = algo.full;
+      document.getElementById("tt-desc").textContent = algo.desc;
+      const badge = document.getElementById("tt-badge");
+      badge.textContent = catLabel(algo.category);
+      badge.style.background = catColor(algo.category) + "33";
+      badge.style.color = catColor(algo.category);
+      badge.style.border = `1px solid ${catColor(algo.category)}66`;
+      const link = document.getElementById("tt-link");
+      link.href = algo.paper;
+      link.style.display = algo.paper ? "inline-block" : "none";
+    }
+
+    function showTooltip(e, algo) {
+      fillTooltip(algo);
+      tooltip.style.pointerEvents = "none";   // hover: don't block mouse
+      tooltip.style.display = "block";
+      const x = e.clientX + 16;
+      const y = e.clientY - 10;
+      tooltip.style.left = Math.min(x, W() - 280) + "px";
+      tooltip.style.top = Math.min(y, H() - 160) + "px";
+    }
+
+    function showTooltipPinned(algo) {
+      fillTooltip(algo);
+      tooltip.style.pointerEvents = "auto";   // pinned: allow clicking the link
+      tooltip.style.display = "block";
+      // Position near node's screen projection
+      const pos3d = nodeMap[algo.id].pos.clone();
+      pivot.localToWorld(pos3d);
+      const proj = pos3d.project(camera);
+      const sx = (proj.x * 0.5 + 0.5) * W();
+      const sy = (-proj.y * 0.5 + 0.5) * H();
+      tooltip.style.left = Math.min(sx + 18, W() - 285) + "px";
+      tooltip.style.top = Math.min(sy - 10, H() - 200) + "px";
+    }
+
+    function hideTooltip() {
+      tooltip.style.display = "none";
+      tooltip.style.pointerEvents = "none";
+    }
+
+    // ── Edge side panel ──
+    const edgeTooltip = document.getElementById("edge-tooltip");
+    document.getElementById("et-close").addEventListener("click", hideEdgeTooltip);
+
+    function showEdgeTooltip(e, srcId, dstId) {
+      const srcData = nodeMap[srcId]?.data;
+      const dstData = nodeMap[dstId]?.data;
+      if (!srcData || !dstData) return;
+
+      document.getElementById("et-src").textContent = srcData.name;
+      document.getElementById("et-dst").textContent = dstData.name;
+
+      // Look up improvement description: try both directions
+      const key = edgeKey(srcId, dstId);
+      const fwd = edgeImproves[key];
+      let desc = "";
+      if (fwd) {
+        desc = fwd.desc || "";
+        document.getElementById("et-src").textContent = nodeMap[fwd.srcId]?.data?.name || srcData.name;
+        document.getElementById("et-dst").textContent = nodeMap[fwd.dstId]?.data?.name || dstData.name;
+      }
+      document.getElementById("et-desc").textContent =
+        desc || "这两个算法在方法设计上存在直接关联。";
+
+      edgeTooltip.classList.add("visible");
+    }
+
+    function hideEdgeTooltip() {
+      edgeTooltip.classList.remove("visible");
+      pinnedEdgeKey = null;
+      resetHighlight();
+    }
+
+    // ── Highlight connected nodes ──
+    function highlightNode(id) {
+      const node = nodeMap[id];
+      if (!node) return;
+      const connected = new Set([id, ...(neighbors[id] || [])]);
+
+      nodeMeshes.forEach(m => {
+        const aid = m.userData.algo?.id;
+        const isCon = connected.has(aid);
+        m.material.opacity = isCon ? 1 : 0.18;
+        m.scale.setScalar(isCon && aid === id ? 1.0 : isCon ? 0.7 : 0.4);
+      });
+
+      const edgeColor = nodeMap[id]?.data ? CAT[nodeMap[id].data.category].color : 0x8866ff;
+      lineMeshes.forEach(l => {
+        const rel = l.userData.srcId === id || l.userData.dstId === id;
+        l.material.opacity = rel ? 0.72 : 0;
+        l.material.color.set(rel ? edgeColor : 0x6655cc);
+        l.visible = rel;
+      });
+    }
+    function resetHighlight() {
+      nodeMeshes.forEach(m => {
+        m.material.opacity = 1;
+        m.scale.setScalar(m.userData.baseScale || 0.55);
+      });
+      lineMeshes.forEach(l => {
+        l.material.opacity = 0;
+        l.material.color.set(0x6655cc);
+        l.visible = false;
+      });
+    }
+
+    // ── Category nav bar → rotate globe to sector ──
+    let activeCat = null;
+    let targetRotY = null;   // null = free spin, number = animate toward this angle
+
+    // The sector center lon for each category (matches SECTOR_CENTER defined above)
+    // We want that lon to face the camera (+Z direction), so target = -(lon)
+    function catTargetRotY(cat) {
+      // Use the actual average phi of each category's nodes (computed from real positions)
+      return CAT_TARGET_ROTY[cat] ?? 0;
+    }
+
+    function setActiveCat(cat) {
+      activeCat = cat;
+      targetRotY = catTargetRotY(cat);
+
+      // Update tab styles
+      document.querySelectorAll(".cat-tab").forEach(el => {
+        const isActive = el.dataset.cat === cat;
+        const dotColor = CAT[el.dataset.cat]?.hex || "#888";
+        if (isActive) {
+          el.classList.add("active");
+          el.style.background = dotColor + "22";
+          el.style.borderColor = dotColor + "88";
+          el.style.color = "#fff";
+          el.querySelector(".cat-tab-dot").style.boxShadow = `0 0 8px ${dotColor}`;
+          // Scroll tab into view (globe mode only)
+          if (viewMode !== "map") {
+            el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+          }
+        } else {
+          el.classList.remove("active");
+          el.style.background = "transparent";
+          el.style.borderColor = "transparent";
+          el.style.color = "rgba(180,180,220,0.6)";
+          el.querySelector(".cat-tab-dot").style.boxShadow = `0 0 6px ${dotColor}44`;
+        }
+      });
+    }
+
+    // Smooth pan target for map mode
+    let mapPanTarget = null;
+
+    document.querySelectorAll(".cat-tab").forEach(el => {
+      el.addEventListener("click", () => {
+        const cat = el.dataset.cat;
+        if (viewMode === "map") {
+          // Pan so this column is centered on screen
+          const ci = SECTOR_ORDER.indexOf(cat);
+          const cx = MAP_X0 + ci * (COL_W + COL_GAP);
+          mapPanTarget = -cx;   // pivot.position.x = -colCenter puts it in screen center
+          return;
+        }
+        if (activeCat === cat) {
+          activeCat = null;
+          targetRotY = null;
+          el.classList.remove("active");
+          el.style.background = "transparent";
+          el.style.borderColor = "transparent";
+          el.style.color = "rgba(180,180,220,0.6)";
+        } else {
+          setActiveCat(cat);
+        }
+      });
+    });
+
+    // ── Search ──
+    document.getElementById("search-input").addEventListener("input", e => {
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) { resetHighlight(); return; }
+      const match = ALGORITHMS.find(a =>
+        a.name.toLowerCase().includes(q) ||
+        a.full.toLowerCase().includes(q) ||
+        a.id.toLowerCase().includes(q)
+      );
+      if (match) highlightNode(match.id);
+      else resetHighlight();
+    });
+
+    // ════════════════════════════════════════════════
+    //  VIEW TOGGLE  (Globe ↔ Map)
+    //  Map layout: 5 columns, each column = one category
+    //  Nodes stacked vertically inside their column
+    // ════════════════════════════════════════════════
+    let viewMode = "globe";
+    let morphT = 0;       // 0=globe, 1=map
+    let morphDir = 0;       // +1 or -1
+    const MORPH_SPD = 0.028;
+
+    // ── Compute column layout for map view ──
+    const COL_W = 2.1;    // width per column
+    const COL_GAP = 0.22;   // gap between columns
+    const NODE_STEP = 0.62;   // vertical spacing between nodes in a column
+    const MAP_TOP = 1.6;    // y of first node row
+    const TOTAL_COLS = SECTOR_ORDER.length;
+    const MAP_TOTAL_W = TOTAL_COLS * COL_W + (TOTAL_COLS - 1) * COL_GAP;
+    const MAP_X0 = -MAP_TOTAL_W / 2 + COL_W / 2;  // center x of first column
+
+    // Group algorithms by category, preserving order
+    const catGroups = {};
+    SECTOR_ORDER.forEach(cat => { catGroups[cat] = []; });
+    ALGORITHMS.forEach(algo => { catGroups[algo.category].push(algo); });
+
+    // Assign flat positions: column center x, stacked y
+    const flatPos = {};
+    SECTOR_ORDER.forEach((cat, ci) => {
+      const cx = MAP_X0 + ci * (COL_W + COL_GAP);
+      catGroups[cat].forEach((algo, ri) => {
+        // Center the stack vertically
+        const total = catGroups[cat].length;
+        const stackH = (total - 1) * NODE_STEP;
+        const y = (stackH / 2) - ri * NODE_STEP;
+        flatPos[algo.id] = new THREE.Vector3(cx, y, 0);
+      });
+    });
+
+    // ── Map overlay elements (added to pivot, start invisible) ──
+    const mapLabels = [];
+    const mapColLines = [];
+
+    // Column header labels
+    SECTOR_ORDER.forEach((cat, ci) => {
+      const cx = MAP_X0 + ci * (COL_W + COL_GAP);
+      const total = catGroups[cat].length;
+      const stackH = (total - 1) * NODE_STEP;
+      const y = stackH / 2 + 0.52;
+
+      const cnv = document.createElement("canvas");
+      cnv.width = 256; cnv.height = 64;
+      const ctx = cnv.getContext("2d");
+      ctx.clearRect(0, 0, 256, 64);
+      ctx.fillStyle = CAT[cat].hex + "22";
+      ctx.strokeStyle = CAT[cat].hex + "99";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(3, 3, 250, 58, 14); ctx.fill(); ctx.stroke();
+      ctx.font = "bold 24px 'Segoe UI', sans-serif";
+      ctx.fillStyle = CAT[cat].hex;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText(CAT[cat].label, 128, 32);
+
+      const tex = new THREE.CanvasTexture(cnv);
+      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0, depthWrite: false });
+      const spr = new THREE.Sprite(mat);
+      spr.scale.set(COL_W * 0.78, 0.28, 1);
+      spr.position.set(cx, y, 0.01);
+      pivot.add(spr);
+      mapLabels.push(spr);
+
+      // Vertical divider line between columns (right edge of each col except last)
+      if (ci < TOTAL_COLS - 1) {
+        const lx = cx + COL_W / 2 + COL_GAP / 2;
+        const pts = [
+          new THREE.Vector3(lx, -2.4, 0),
+          new THREE.Vector3(lx, 2.4, 0),
+        ];
+        const geo = new THREE.BufferGeometry().setFromPoints(pts);
+        const lmat = new THREE.LineBasicMaterial({
+          color: CAT[cat].color, transparent: true, opacity: 0,
+          blending: THREE.AdditiveBlending, depthWrite: false,
+        });
+        const line = new THREE.Line(geo, lmat);
+        pivot.add(line);
+        mapColLines.push(line);
+      }
+    });
+
+    function setView(mode) {
+      if (mode === viewMode) return;
+      viewMode = mode;
+      morphDir = mode === "map" ? 1 : -1;
+
+      document.getElementById("btn-globe").classList.toggle("active", mode === "globe");
+      document.getElementById("btn-map").classList.toggle("active", mode === "map");
+
+      if (mode === "map") {
+        // Stop rotation immediately
+        rotVel = { x: 0, y: 0 };
+        targetRotY = pivot.rotation.y;  // freeze in place while morphing
+        isDragging = false;
+      } else {
+        targetRotY = null;  // resume free spin after morph back
+      }
+    }
+
+    document.getElementById("btn-globe").addEventListener("click", () => setView("globe"));
+    document.getElementById("btn-map").addEventListener("click", () => setView("map"));
+
+    // ════════════════════════════════════════════════
+    //  ANIMATION LOOP
+    // ════════════════════════════════════════════════
+    const clock = new THREE.Clock();
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
+
+      // ── Map pan inertia + snap to column ──
+      if (viewMode === "map" && morphT >= 1) {
+        if (!isDragging) {
+          if (mapPanTarget !== null) {
+            // Smooth animate toward target column center
+            const diff = mapPanTarget - mapPanX;
+            mapPanX += diff * 0.1;
+            if (Math.abs(diff) < 0.002) { mapPanX = mapPanTarget; mapPanTarget = null; }
+            mapPanVelX = 0;
+          } else {
+            // Inertia after manual drag
+            mapPanVelX *= 0.92;
+            mapPanX += mapPanVelX;
+          }
+          pivot.position.x = mapPanX;
+        }
+        // No rotation in map mode
+      } else {
+        // Reset pan when back to globe
+        if (viewMode === "globe" && morphT <= 0) {
+          mapPanX = 0; mapPanVelX = 0;
+          pivot.position.x += (0 - pivot.position.x) * 0.1;
+        }
+
+        // Auto-rotate / snap to sector (globe mode only)
+        if (!isDragging) {
+          if (targetRotY !== null) {
+            let cur = pivot.rotation.y;
+            let diff = targetRotY - cur;
+            diff = diff - 2 * Math.PI * Math.round(diff / (2 * Math.PI));
+            pivot.rotation.y += diff * 0.055;
+            pivot.rotation.x += (0 - pivot.rotation.x) * 0.055;
+            rotVel = { x: 0, y: 0 };
+          } else {
+            rotVel.y *= 0.95;
+            rotVel.x *= 0.95;
+            pivot.rotation.y += rotVel.y + 0.0012;
+            pivot.rotation.x += rotVel.x;
+          }
+        } else {
+          targetRotY = null;
+          // Dragging cancels pin and activeCat
+          if (pinnedId !== null) {
+            pinnedId = null;
+            hoveredId = null;
+            hideTooltip();
+            resetHighlight();
+          }
+          if (activeCat) {
+            activeCat = null;
+            document.querySelectorAll(".cat-tab").forEach(el => {
+              el.classList.remove("active");
+              el.style.background = "transparent";
+              el.style.borderColor = "transparent";
+              el.style.color = "rgba(180,180,220,0.6)";
+            });
+          }
+        }
+      }
+
+      // ── Morph Globe ↔ Map ──
+      if (morphDir !== 0) {
+        morphT = Math.max(0, Math.min(1, morphT + morphDir * MORPH_SPD));
+        if (morphT <= 0 || morphT >= 1) morphDir = 0;
+      }
+
+      // Always apply morphT (even when morphDir===0, to hold final state)
+      {
+        // Ease in-out cubic
+        const ease = morphT < 0.5
+          ? 4 * morphT * morphT * morphT
+          : 1 - Math.pow(-2 * morphT + 2, 3) / 2;
+
+        // Nodes: lerp sphere → column positions
+        nodeMeshes.forEach((m, i) => {
+          const id = m.userData.algo.id;
+          const sp = nodeMap[id].pos;
+          const fp = flatPos[id];
+          m.position.lerpVectors(sp, fp, ease);
+
+          // Label: above node in map, offset from surface in globe
+          const lbl = labelSprites[i];
+          const spLbl = sp.clone().add(sp.clone().normalize().multiplyScalar(0.38));
+          const fpLbl = fp.clone().add(new THREE.Vector3(0, 0.26, 0));
+          lbl.position.lerpVectors(spLbl, fpLbl, ease);
+        });
+
+        // Connection lines
+        lineMeshes.forEach(line => {
+          const srcId = line.userData.srcId, dstId = line.userData.dstId;
+          if (!nodeMap[srcId] || !nodeMap[dstId]) return;
+          const cur1 = new THREE.Vector3().lerpVectors(nodeMap[srcId].pos, flatPos[srcId], ease);
+          const cur2 = new THREE.Vector3().lerpVectors(nodeMap[dstId].pos, flatPos[dstId], ease);
+          const spMid = new THREE.Vector3().addVectors(nodeMap[srcId].pos, nodeMap[dstId].pos).multiplyScalar(0.45);
+          // In map mode: arc the control point perpendicularly so lines don't overlap nodes
+          const fpMidFlat = new THREE.Vector3().addVectors(flatPos[srcId], flatPos[dstId]).multiplyScalar(0.5);
+          const dx = flatPos[dstId].x - flatPos[srcId].x;
+          const dy = flatPos[dstId].y - flatPos[srcId].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          // Perpendicular offset: scale with distance so short lines arc less
+          const arcAmount = dist * 0.22;
+          // Alternate arc direction by a hash of the two ids to avoid all arcs going same way
+          const arcSign = ((srcId.charCodeAt(0) + dstId.charCodeAt(0)) % 2 === 0) ? 1 : -1;
+          fpMidFlat.x += (-dy / (dist || 1)) * arcAmount * arcSign;
+          fpMidFlat.y += (dx / (dist || 1)) * arcAmount * arcSign;
+          const curMid = new THREE.Vector3().lerpVectors(spMid, fpMidFlat, ease);
+          const curve = new THREE.QuadraticBezierCurve3(cur1, curMid, cur2);
+          line.geometry.dispose();
+          line.geometry = taperedTubeGeometry(curve, 30, 0.018, 6);
+          line.userData.curve = curve;
+        });
+
+        // Globe shell + wireframe fade out, fully hidden in map mode
+        globe.visible = morphT < 1;
+        wireMesh.visible = morphT < 1;
+        if (morphT < 1) {
+          globeMat.opacity = (0.05 + 0.03 * Math.sin(t * 0.6)) * (1 - ease);
+          wireMat.opacity = 0.13 * (1 - ease);
+        }
+
+        // Map column dividers + labels fade in
+        mapColLines.forEach(l => { l.material.opacity = ease * 0.3; });
+        mapLabels.forEach(l => { l.material.opacity = ease; });
+
+        // Flatten pivot rotation during map transition
+        if (morphT > 0) {
+          pivot.rotation.x += (0 - pivot.rotation.x) * 0.08;
+          pivot.rotation.y += (0 - pivot.rotation.y) * 0.08;
+          // Fully lock at zero once map is complete
+          if (morphT >= 1) {
+            pivot.rotation.x = 0;
+            pivot.rotation.y = 0;
+          }
+        }
+      }
+
+      // Pulse nodes only in globe mode
+      if (morphT < 0.95) {
+        nodeMeshes.forEach((m, i) => {
+          const base = m.userData.baseScale || 0.55;
+          const pulse = 1 + 0.12 * (1 - morphT) * Math.sin(t * 1.8 + i * 0.7);
+          if (m.scale.x / base > 0.5) m.scale.setScalar(base * pulse);
+        });
+      }
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ── Resize ──
+    window.addEventListener("resize", () => {
+      camera.aspect = W() / H();
+      camera.updateProjectionMatrix();
+      renderer.setSize(W(), H());
+    });
+  </script>
+</body>
+
+</html>
