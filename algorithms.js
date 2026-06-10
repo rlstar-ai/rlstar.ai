@@ -363,5 +363,17 @@ const ALGORITHMS = [
     venue: "arXiv",
     connects: ["minillm", "grpo", "reinforce_plus"]
   },
+  {
+    id: "stepopsd",
+    name: "StepOPSD",
+    full: "Step-Aware Online Preference Distillation for Agent RL",
+    category: "agentic",
+    year: 2026,
+    affiliation: "Unknown",
+    desc: "Decomposes agent trajectories into action-centered segments, re-scores each step online, and applies preference distillation with advantage shaping to solve the credit assignment problem in multi-turn",
+    paper: "https://arxiv.org/abs/2605.27140",
+    venue: "arXiv",
+    connects: ["minillm"]
+  },
 
 ];
