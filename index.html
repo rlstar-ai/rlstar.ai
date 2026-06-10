@@ -58,6 +58,36 @@
       letter-spacing: 0.06em;
     }
 
+    /* ── Mobile layout: stack header below the toolbar row ── */
+    @media (max-width: 600px) {
+      #header {
+        top: 70px;
+      }
+
+      #header h1 {
+        font-size: 1.4rem;
+      }
+
+      #header p {
+        font-size: 0.68rem;
+      }
+
+      #search-box {
+        top: 20px;
+        left: 12px;
+      }
+
+      #search-box input {
+        width: 130px;
+        font-size: 0.7rem;
+      }
+
+      #view-toggle {
+        top: 20px;
+        right: 12px;
+      }
+    }
+    
     /* ── Category nav bar ── */
     #cat-nav {
       position: absolute;
