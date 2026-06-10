@@ -16,7 +16,7 @@ const ALGORITHMS = [
     paper: "https://link.springer.com/article/10.1007/BF00992696",
     venue: "Machine Learning",
     connects: ["ppo", "grpo"],
-    improves: {"ppo": "PPO 在 REINFORCE 基础上引入 clip 约束和 value network，解决了其高方差和步长难以控制的问题", "grpo": "GRPO 以 REINFORCE 为基础，用组内相对奖励替代累积回报，去掉 value network 同时降低方差"}
+    improves: { "ppo": "PPO 在 REINFORCE 基础上引入 clip 约束和 value network，解决了其高方差和步长难以控制的问题", "grpo": "GRPO 以 REINFORCE 为基础，用组内相对奖励替代累积回报，去掉 value network 同时降低方差" }
   },
   {
     id: "ppo",
@@ -31,7 +31,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 8200,
     connects: ["grpo", "dapo", "reinforce_plus"],
-    improves: {"grpo": "PPO 的 clip 机制和 importance sampling 框架被 GRPO 直接继承，GRPO 在此基础上去掉了 value network", "dapo": "DAPO 将 PPO 的对称 clip 拆分为解耦 clip，是对 PPO clip 设计的直接扩展", "reinforce_plus": "REINFORCE++ 借用了 PPO 的 reward clip、mini-batch 等工程技巧，将其移植到无 value network 的 REINFORCE 框架"}
+    improves: { "grpo": "PPO 的 clip 机制和 importance sampling 框架被 GRPO 直接继承，GRPO 在此基础上去掉了 value network", "dapo": "DAPO 将 PPO 的对称 clip 拆分为解耦 clip，是对 PPO clip 设计的直接扩展", "reinforce_plus": "REINFORCE++ 借用了 PPO 的 reward clip、mini-batch 等工程技巧，将其移植到无 value network 的 REINFORCE 框架" }
   },
   {
     id: "rlhf",
@@ -45,7 +45,7 @@ const ALGORITHMS = [
     venue: "NeurIPS 2022",
     stars: 12000,
     connects: ["ppo", "dpo", "rlaif"],
-    improves: {"ppo": "RLHF 将 PPO 应用于语言模型对齐，引入 KL 惩罚防止奖励 hack，开创了 LLM 后训练范式", "dpo": "DPO 将 RLHF 的两阶段流程（训练 RM + PPO）简化为单一分类损失，无需显式 reward model", "rlaif": "RLAIF 保留 RLHF 框架，将人工标注替换为 AI judge，大幅降低标注成本并提升可扩展性"}
+    improves: { "ppo": "RLHF 将 PPO 应用于语言模型对齐，引入 KL 惩罚防止奖励 hack，开创了 LLM 后训练范式", "dpo": "DPO 将 RLHF 的两阶段流程（训练 RM + PPO）简化为单一分类损失，无需显式 reward model", "rlaif": "RLAIF 保留 RLHF 框架，将人工标注替换为 AI judge，大幅降低标注成本并提升可扩展性" }
   },
   // ── Alignment ────────────────────────────────────────────────────
   {
@@ -61,9 +61,9 @@ const ALGORITHMS = [
     venue: "NeurIPS 2023",
     stars: 7800,
     connects: ["rlhf", "orpo", "simpo"],
-    improves: {"rlhf": "将 RLHF 的三步流程（SFT→RM→PPO）压缩为单一 BCE 损失，通过闭式解推导出等价目标，训练稳定性大幅提升", "orpo": "ORPO 在 DPO 基础上去掉 reference model，将 SFT 与对齐合并为一个 loss，进一步简化流程", "simpo": "SimPO 在 DPO 基础上去掉 reference model 并引入长度归一化与 reward margin，缓解了 DPO 的冗长偏好问题"}
+    improves: { "rlhf": "将 RLHF 的三步流程（SFT→RM→PPO）压缩为单一 BCE 损失，通过闭式解推导出等价目标，训练稳定性大幅提升", "orpo": "ORPO 在 DPO 基础上去掉 reference model，将 SFT 与对齐合并为一个 loss，进一步简化流程", "simpo": "SimPO 在 DPO 基础上去掉 reference model 并引入长度归一化与 reward margin，缓解了 DPO 的冗长偏好问题" }
   },
-  
+
   {
     id: "minillm",
     name: "MiniLLM",
@@ -102,7 +102,7 @@ const ALGORITHMS = [
     venue: "NeurIPS 2023",
     stars: 4100,
     connects: ["agent_rl"],
-    improves: {"agent_rl": "用语言反思替代梯度更新，无需参数修改即可在多次尝试间学习，开创了 verbal RL 范式，为 agentic RL 提供了无梯度的轻量替代路径"}
+    improves: { "agent_rl": "用语言反思替代梯度更新，无需参数修改即可在多次尝试间学习，开创了 verbal RL 范式，为 agentic RL 提供了无梯度的轻量替代路径" }
   },
   {
     id: "rlaif",
@@ -116,7 +116,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 2900,
     connects: ["rlhf", "dpo"],
-    improves: {"rlhf": "将人工标注替换为 AI judge，标注成本降低 10-100×，可扩展至海量数据，且 AI 标注一致性优于人工", "dpo": "RLAIF 提供高质量 AI 标注偏好对，可作为 DPO 的数据来源，实现全自动对齐流水线"}
+    improves: { "rlhf": "将人工标注替换为 AI judge，标注成本降低 10-100×，可扩展至海量数据，且 AI 标注一致性优于人工", "dpo": "RLAIF 提供高质量 AI 标注偏好对，可作为 DPO 的数据来源，实现全自动对齐流水线" }
   },
   {
     id: "agent_rl",
@@ -129,7 +129,19 @@ const ALGORITHMS = [
     paper: "https://arxiv.org/abs/2410.02707",
     venue: "arXiv",
     connects: ["ppo", "grpo", "ragen", "agentq"],
-    improves: {"ppo": "将 PPO 扩展到多步工具调用轨迹，处理稀疏奖励和长程信用分配，使 PPO 可用于复杂 agentic 任务", "grpo": "将 GRPO 的 group-relative 思想引入多步 agent 轨迹级奖励，为 RAGEN 等工作奠定基础", "ragen": "RAGEN 直接继承 AgentRL 的多步 RL 框架，加入 think-tool 交替轨迹和推理 mask 精细化信用分配", "agentq": "Agent-Q 在 AgentRL 框架下引入 MCTS 搜索生成高质量轨迹对，再用 DPO 而非在线 RL 优化策略"}
+    improves: { "ppo": "将 PPO 扩展到多步工具调用轨迹，处理稀疏奖励和长程信用分配，使 PPO 可用于复杂 agentic 任务", "grpo": "将 GRPO 的 group-relative 思想引入多步 agent 轨迹级奖励，为 RAGEN 等工作奠定基础", "ragen": "RAGEN 直接继承 AgentRL 的多步 RL 框架，加入 think-tool 交替轨迹和推理 mask 精细化信用分配", "agentq": "Agent-Q 在 AgentRL 框架下引入 MCTS 搜索生成高质量轨迹对，再用 DPO 而非在线 RL 优化策略" }
+  },
+  {
+    id: "stepopsd",
+    name: "StepOPSD",
+    full: "Step-Aware Online Preference Distillation for Agent RL",
+    category: "agentic",
+    year: 2026,
+    affiliation: "Unknown",
+    desc: "Decomposes agent trajectories into action-centered segments, re-scores each step online, and applies preference distillation with advantage shaping to solve the credit assignment problem in multi-turn agent RL.",
+    paper: "https://arxiv.org/abs/2605.27140",
+    venue: "arXiv",
+    connects: ["minillm"],
   },
   {
     id: "agentq",
@@ -143,7 +155,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 1100,
     connects: ["agent_rl", "dpo"],
-    improves: {"agent_rl": "引入 MCTS 在训练时探索高质量轨迹，解决 agentic RL 中稀疏奖励下探索困难的问题，WebShop 任务提升至 57%", "dpo": "将 DPO 从单轮文本偏好扩展到多步轨迹级偏好，用 MCTS 成功/失败路径对构造训练数据"}
+    improves: { "agent_rl": "引入 MCTS 在训练时探索高质量轨迹，解决 agentic RL 中稀疏奖励下探索困难的问题，WebShop 任务提升至 57%", "dpo": "将 DPO 从单轮文本偏好扩展到多步轨迹级偏好，用 MCTS 成功/失败路径对构造训练数据" }
   },
   // ── Reasoning-RL ─────────────────────────────────────────────────
   {
@@ -159,7 +171,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 9100,
     connects: ["ppo", "dapo", "gspo", "deepseek_r1"],
-    improves: {"ppo": "用 group-relative baseline 替代 value network，节省约 50% 显存，天然适配 pass@k 风格的规则奖励，无需 critic 网络"}
+    improves: { "ppo": "用 group-relative baseline 替代 value network，节省约 50% 显存，天然适配 pass@k 风格的规则奖励，无需 critic 网络" }
   },
   // ── Tech Report ──────────────────────────────────────────────────
   {
@@ -173,7 +185,7 @@ const ALGORITHMS = [
     paper: "https://openai.com/index/openai-o1-system-card/",
     venue: "System Card",
     connects: ["ppo", "deepseek_r1"],
-    improves: {"ppo": "将 PPO 大规模应用于 LLM 长链推理训练，引入 hidden reasoning tokens，首次展示 test-time compute scaling 的巨大潜力", "deepseek_r1": "DeepSeek-R1 以开源方式复现了 o1 的核心能力，用 GRPO 替代 PPO 在 AIME 等 benchmark 上达到同等水平"}
+    improves: { "ppo": "将 PPO 大规模应用于 LLM 长链推理训练，引入 hidden reasoning tokens，首次展示 test-time compute scaling 的巨大潜力", "deepseek_r1": "DeepSeek-R1 以开源方式复现了 o1 的核心能力，用 GRPO 替代 PPO 在 AIME 等 benchmark 上达到同等水平" }
   },
   {
     id: "orpo",
@@ -188,7 +200,7 @@ const ALGORITHMS = [
     venue: "ACL 2024",
     stars: 1600,
     connects: ["dpo"],
-    improves: {"dpo": "去掉 reference model（节省一倍显存），将 SFT 目标内嵌为正则项，单阶段完成对齐，训练速度提升且无需分阶段"}
+    improves: { "dpo": "去掉 reference model（节省一倍显存），将 SFT 目标内嵌为正则项，单阶段完成对齐，训练速度提升且无需分阶段" }
   },
   {
     id: "rloo",
@@ -203,7 +215,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 1200,
     connects: ["reinforce", "grpo"],
-    improves: {"reinforce": "用 leave-one-out 估计量作为 baseline，相比原始 REINFORCE 的零 baseline 大幅降低方差，且估计无偏", "grpo": "LOO baseline 在理论上无偏（GRPO 将自身包含在 mean 里有小偏差），适合作为轻量对比基线"}
+    improves: { "reinforce": "用 leave-one-out 估计量作为 baseline，相比原始 REINFORCE 的零 baseline 大幅降低方差，且估计无偏", "grpo": "LOO baseline 在理论上无偏（GRPO 将自身包含在 mean 里有小偏差），适合作为轻量对比基线" }
   },
   {
     id: "simpo",
@@ -218,7 +230,7 @@ const ALGORITHMS = [
     venue: "NeurIPS 2024",
     stars: 1900,
     connects: ["dpo", "orpo"],
-    improves: {"dpo": "去掉 reference model，引入长度归一化（1/|y|）防止冗长偏好，加入 reward margin γ 避免 winning/losing 奖励趋近，AlpacaEval 2.0 提升 11 点", "orpo": "与 ORPO 同样无需 reference model，但用平均 log-likelihood 替代 odds ratio，并显式引入 margin 约束"}
+    improves: { "dpo": "去掉 reference model，引入长度归一化（1/|y|）防止冗长偏好，加入 reward margin γ 避免 winning/losing 奖励趋近，AlpacaEval 2.0 提升 11 点", "orpo": "与 ORPO 同样无需 reference model，但用平均 log-likelihood 替代 odds ratio，并显式引入 margin 约束" }
   },
   {
     id: "dapo",
@@ -233,7 +245,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 2800,
     connects: ["grpo", "gspo", "ppo", "reinforce_plus"],
-    improves: {"grpo": "引入解耦 clip（ε_low ≠ ε_high）、去除 KL 惩罚、动态采样过滤无梯度信号、token 级归一化，解决 GRPO 在长 CoT 场景的四大失效模式，AIME 提升 50 分", "ppo": "移除对称 clip 和 KL 惩罚，改为单侧解耦 clip，策略在正更新方向可迈更大步，更适合长链推理"}
+    improves: { "grpo": "引入解耦 clip（ε_low ≠ ε_high）、去除 KL 惩罚、动态采样过滤无梯度信号、token 级归一化，解决 GRPO 在长 CoT 场景的四大失效模式，AIME 提升 50 分", "ppo": "移除对称 clip 和 KL 惩罚，改为单侧解耦 clip，策略在正更新方向可迈更大步，更适合长链推理" }
   },
   {
     id: "deepseek_r1",
@@ -248,7 +260,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 32000,
     connects: ["grpo", "dapo", "qwen_rl"],
-    improves: {"grpo": "首次在大规模 base model 上纯用 GRPO 激发涌现 CoT，验证了 GRPO 不需要 SFT 冷启动即可产生自我反思行为", "dapo": "DeepSeek-R1 的训练经验直接催生了 DAPO 对 GRPO 失效模式的系统性修复", "qwen_rl": "Qwen3 复现并扩展了 DeepSeek-R1 的 GRPO 训练方案，在更大规模上验证并补充了其训练技巧"}
+    improves: { "grpo": "首次在大规模 base model 上纯用 GRPO 激发涌现 CoT，验证了 GRPO 不需要 SFT 冷启动即可产生自我反思行为", "dapo": "DeepSeek-R1 的训练经验直接催生了 DAPO 对 GRPO 失效模式的系统性修复", "qwen_rl": "Qwen3 复现并扩展了 DeepSeek-R1 的 GRPO 训练方案，在更大规模上验证并补充了其训练技巧" }
   },
   {
     id: "drgrpo",
@@ -263,7 +275,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 510,
     connects: ["grpo"],
-    improves: {"grpo": "消除两个系统性偏差：用 1/T_i 长度归一化消除长回复梯度虚高，跨问题归一化消除难题梯度主导，使训练更公平稳定"}
+    improves: { "grpo": "消除两个系统性偏差：用 1/T_i 长度归一化消除长回复梯度虚高，跨问题归一化消除难题梯度主导，使训练更公平稳定" }
   },
   {
     id: "gspo",
@@ -277,7 +289,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 420,
     connects: ["grpo", "dapo"],
-    improves: {"grpo": "将 token 级 IS ratio 改为 sequence 级，避免长序列中 IS 乘积爆炸，训练更稳定，梯度方差显著降低", "dapo": "从 IS 粒度角度与 DAPO 的解耦 clip 互补，两者结合可同时解决 clip 不对称和 IS 爆炸问题"}
+    improves: { "grpo": "将 token 级 IS ratio 改为 sequence 级，避免长序列中 IS 乘积爆炸，训练更稳定，梯度方差显著降低", "dapo": "从 IS 粒度角度与 DAPO 的解耦 clip 互补，两者结合可同时解决 clip 不对称和 IS 爆炸问题" }
   },
   {
     id: "kimi_k1",
@@ -291,7 +303,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 4200,
     connects: ["ppo", "grpo", "deepseek_r1"],
-    improves: {"ppo": "用 online mirror descent 替代 PPO clip，在长 horizon rollout 下更新更稳定，并引入 length penalty 防止奖励 hack", "grpo": "在 GRPO 基础上引入上下文窗口渐进扩展（4K→128K）和长度惩罚，解决长 CoT 训练的扩展性问题", "deepseek_r1": "与 DeepSeek-R1 同期，Kimi k1.5 独立验证了长 CoT RL 路线，并补充了上下文扩展和 long-to-short 蒸馏技术"}
+    improves: { "ppo": "用 online mirror descent 替代 PPO clip，在长 horizon rollout 下更新更稳定，并引入 length penalty 防止奖励 hack", "grpo": "在 GRPO 基础上引入上下文窗口渐进扩展（4K→128K）和长度惩罚，解决长 CoT 训练的扩展性问题", "deepseek_r1": "与 DeepSeek-R1 同期，Kimi k1.5 独立验证了长 CoT RL 路线，并补充了上下文扩展和 long-to-short 蒸馏技术" }
   },
   {
     id: "qwen_rl",
@@ -306,7 +318,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 18000,
     connects: ["grpo", "deepseek_r1"],
-    improves: {"grpo": "在 Qwen3 系列上大规模应用 GRPO，补充了 curriculum 难度调度、reward shaping 细节和 thinking budget 等工程最佳实践", "deepseek_r1": "复现并超越 DeepSeek-R1，开源了完整权重和训练细节，将 RL 推理训练推广到 0.6B-235B 全系列规模"}
+    improves: { "grpo": "在 Qwen3 系列上大规模应用 GRPO，补充了 curriculum 难度调度、reward shaping 细节和 thinking budget 等工程最佳实践", "deepseek_r1": "复现并超越 DeepSeek-R1，开源了完整权重和训练细节，将 RL 推理训练推广到 0.6B-235B 全系列规模" }
   },
   {
     id: "ragen",
@@ -321,7 +333,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 890,
     connects: ["agent_rl", "dapo"],
-    improves: {"agent_rl": "在多步 agentic RL 框架上引入 think-tool 交替轨迹格式，并用 reasoning mask 只对思考 token 施加梯度，WebArena 提升 18 点", "dapo": "将 DAPO 的 token 级归一化和动态采样扩展到多轮 agent 场景，解决长轨迹中梯度失衡问题"}
+    improves: { "agent_rl": "在多步 agentic RL 框架上引入 think-tool 交替轨迹格式，并用 reasoning mask 只对思考 token 施加梯度，WebArena 提升 18 点", "dapo": "将 DAPO 的 token 级归一化和动态采样扩展到多轮 agent 场景，解决长轨迹中梯度失衡问题" }
   },
   {
     id: "reinforce_plus",
@@ -335,7 +347,7 @@ const ALGORITHMS = [
     venue: "arXiv",
     stars: 680,
     connects: ["ppo", "grpo", "dapo"],
-    improves: {"ppo": "去掉 value network，加入 token 级 running baseline + reward clip + mini-batch SGD，在保留 PPO 稳定性的同时大幅降低显存", "grpo": "无需 group sampling（每 prompt 只采 1 条）即可达到 GRPO 相当的性能，显存占用约为 GRPO 的 1/G", "dapo": "与 DAPO 的 token 级归一化思路相同，但从 REINFORCE 角度出发，提供更简洁的理论解释"}
+    improves: { "ppo": "去掉 value network，加入 token 级 running baseline + reward clip + mini-batch SGD，在保留 PPO 稳定性的同时大幅降低显存", "grpo": "无需 group sampling（每 prompt 只采 1 条）即可达到 GRPO 相当的性能，显存占用约为 GRPO 的 1/G", "dapo": "与 DAPO 的 token 级归一化思路相同，但从 REINFORCE 角度出发，提供更简洁的理论解释" }
   },
   {
     id: "mopd",
@@ -348,7 +360,7 @@ const ALGORITHMS = [
     paper: "https://arxiv.org/abs/2601.02780",
     venue: "arXiv",
     connects: ["minillm", "sdpo", "grpo", "deepseek_r1"],
-    improves: {"minillm": "MOPD scales MiniLLM's on-policy distillation to multiple domain-specialized teachers trained via large-scale RL, providing token-level dense rewards instead of sequence-level KL"}
+    improves: { "minillm": "MOPD scales MiniLLM's on-policy distillation to multiple domain-specialized teachers trained via large-scale RL, providing token-level dense rewards instead of sequence-level KL" }
   },
   {
     id: "sdar",
@@ -361,7 +373,7 @@ const ALGORITHMS = [
     paper: "https://arxiv.org/abs/2605.15155",
     venue: "arXiv",
     connects: ["sdpo", "minillm", "grpo"],
-    improves: {"sdpo": "SDAR 将 SDPO 的单轮自蒸馏扩展到多轮 agentic 任务，引入 sigmoid 门控机制过滤低质量 teacher 信号，并与 GRPO 联合优化", "grpo": "用 GRPO 作为 RL 基础，在其损失上叠加 OPSD 自蒸馏项，sigmoid 门控确保蒸馏只在 teacher 轨迹高质量时才生效"}
+    improves: { "sdpo": "SDAR 将 SDPO 的单轮自蒸馏扩展到多轮 agentic 任务，引入 sigmoid 门控机制过滤低质量 teacher 信号，并与 GRPO 联合优化", "grpo": "用 GRPO 作为 RL 基础，在其损失上叠加 OPSD 自蒸馏项，sigmoid 门控确保蒸馏只在 teacher 轨迹高质量时才生效" }
   },
   {
     id: "sdpo",
